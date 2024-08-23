@@ -1,0 +1,101 @@
+I am defining a program. The first block will represent graphically the structure of the directories and filenames.  The second part
+will describe the file name and then below the file contents of that file.
+E:\Code\terraform\SamplePipelineProject:
+|.
+|   backend.tf
+|   main.tf
+|   outputs.tf
+|   terraform.tfvars
+|   variables.tf
+
+backend.tf:
+"
+#backend.tf
+
+terraform {
+  backend "remote" {
+    hostname     = "app.terraform.io"
+    organization = "my-demo2billion"
+
+    workspaces {
+      name = "SamplePipelineProject" # This should match your Terraform Cloud workspace name
+    }
+  }
+}
+
+"
+
+main.tf:
+"
+# main.tf
+
+provider "aws" {
+  region = var.region
+}
+
+resource "aws_s3_bucket" "my_bucket" {
+  bucket = var.bucket_name
+  acl    = var.bucket_acl
+
+  tags = {
+    Environment = var.environment
+    Project     = var.project_name
+  }
+}
+
+
+"
+
+outputs.tf:
+"
+# outputs.tf
+
+output "bucket_name" {
+  description = "The name of the S3 bucket"
+  value       = aws_s3_bucket.my_bucket.bucket
+}
+
+"
+
+terraform.tfvars:
+"
+# terraform.tfvars
+
+region      = "us-west-2"          # or whichever region you'd like to use
+bucket_name = "my-unique-bucket-name-1234563242dd"  # Ensure this bucket name is globally unique
+bucket_acl  = "private"            # Optional, since this has a default value
+"
+
+variables.tf:
+"
+# variables.tf
+
+variable "region" {
+  description = "The AWS region to deploy resources in"
+  type        = string
+  default     = "us-east-1"
+}
+
+variable "bucket_name" {
+  description = "The name of the S3 bucket"
+  type        = string
+}
+
+variable "bucket_acl" {
+  description = "The ACL of the S3 bucket"
+  type        = string
+  default     = "private"
+}
+
+variable "environment" {
+  description = "The environment for this set of resources"
+  type        = string
+  default     = "Development"
+}
+
+variable "project_name" {
+  description = "The project associated with these resources"
+  type        = string
+  default     = "MyProject"
+}
+"
